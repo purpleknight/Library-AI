@@ -1,7 +1,6 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
+
 
 /* Make sure Tailwind is scanning your components */
 @source "../components/**/*.{ts,tsx}";

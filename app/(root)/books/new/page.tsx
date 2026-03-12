@@ -11,7 +11,7 @@ const page = () => {
                </h1>
                <p className="subtitle">
                   Upload a PDF to generate your interactive
-                  interview.
+                  your interactive reading experience.
                </p>
             </section>
 
