@@ -13,9 +13,17 @@ import FileUploader from './FileUploader';
 import VoiceSelector from './VoiceSelector';
 import LoadingOverlay from './LoadingOverlay';
 import { UploadSchema } from '@/lib/zod';
+import { useAuth } from '@clerk/nextjs';
+import { toast } from 'sonner';
+import { checkBookExists, createBook, saveBookSegments } from '@/lib/actions/book.action';
+import { useRouter } from 'next/navigation';
+import { parsePDFFile } from '@/lib/utils';
+import { upload } from '@vercel/blob/client';
 
 const UploadForm = () => {
    const [isSubmitting, setIsSubmitting] = useState(false);
+   const { userId } = useAuth();
+   const router = useRouter();
    // const [isMounted, setIsMounted] = useState(false);
 
    // useEffect(() => {
@@ -28,17 +36,125 @@ const UploadForm = () => {
          title: '',
          author: '',
          voice: DEFAULT_VOICE,
-         bookFile: undefined,
+         pdfFile: undefined,
          coverImage: undefined,
       },
    });
 
-   const onSubmit = async( values: BookUploadFormValues) => {
+   const onSubmit = async( data: BookUploadFormValues) => {
+      // ADD THIS BLOCK FIRST
+      try {
+         const testResponse = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+               type: 'blob.generate-client-token',
+               payload: {
+                  pathname: 'test.pdf',
+                  multipart: false,
+                  clientPayload: null,
+               }
+            }),
+         });
+         console.log('Route status:', testResponse.status);
+         const testJson = await testResponse.json();
+         console.log('Route response:', JSON.stringify(testJson));
+      } catch(e) {
+         console.log('Route fetch error:', e);
+      }
+      // END DIAGNOSTIC BLOCK
+
+      if (!userId) {
+         return toast.error("Please login to upload books.");
+      }
       setIsSubmitting(true);
-      console.log(values);
-      // Simulate submission
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      setIsSubmitting(false);
+      // PostHog -> Track Book Uploads...
+      try {
+         const existsCheck = await checkBookExists(data.title);
+         if (existsCheck.exists && existsCheck.book) {
+            toast.info("Book with same title already exists.");
+            form.reset();
+            router.push(`/books/${existsCheck.book.slug}`)
+            return;
+         }
+
+         const fileTitle = data.title.replace(/\s+/g, '-').toLowerCase();
+         const pdfFile = data.pdfFile instanceof FileList ? data.pdfFile[0] : data.pdfFile;
+
+         const parsedPDF = await parsePDFFile(pdfFile);
+
+         if (parsedPDF.content.length === 0) {
+            toast.error(`Failed to parse PDF. Please try again
+               with a different file.`);
+            return;
+         }
+
+         const uploadedPdfBlob = await upload(fileTitle, pdfFile, {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+            contentType: 'application/pdf'
+         });
+
+         let coverUrl: string;
+
+         if(data.coverImage && data.coverImage.length > 0) {
+            const coverFile = data.coverImage?.[0];
+            const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
+               access: 'public',
+               handleUploadUrl: '/api/upload',
+               contentType: coverFile.type,
+            });
+
+            coverUrl = uploadedCoverBlob.url;
+         } else {
+            const response = await fetch(parsedPDF.cover);
+            const blob = await response.blob();
+
+            const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, blob, {
+               access: 'public',
+               handleUploadUrl: '/api/upload',
+               contentType: 'image/png'
+            });
+            coverUrl = uploadedCoverBlob.url;
+         }
+
+         const book = await createBook({
+            clerkId: userId,
+            title: data.title,
+            author: data.author,
+            voice: data.voice,
+            fileURL: uploadedPdfBlob.url,
+            fileBlobKey: uploadedPdfBlob.pathname,
+            coverURL: coverUrl,
+            fileSize: pdfFile.size,
+         });
+
+         if (!book.success) throw new Error("Failed to create book");
+         
+         if(book.alreadyExists) {
+            toast.info("Book with same title already exists.");
+            form.reset();
+            router.push(`/books/${book.data.slug}`)
+            return;
+         }
+
+         const segments = await saveBookSegments(book.data._id, userId, parsedPDF.content);
+
+         if(!segments.success) {
+            toast.error("Failed to save book segments.");
+            throw new Error("Failed to save book segments.");
+         }
+
+         form.reset();
+         router.push('/');
+
+      } catch (error) {
+         console.error(error);
+
+         toast.error("Failed to upload book. Please try again later")
+      } finally {
+         setIsSubmitting(false);
+      }
    };
 
    // if (!isMounted) return null;
@@ -53,11 +169,11 @@ const UploadForm = () => {
                   {/*1. PDF File Upload */}
                   <FormField
                      control={form.control}
-                     name="bookFile"
+                     name="pdfFile"
                      render={({ field }) => (
                         <FileUploader
                            control={form.control}
-                           name="bookFile"
+                           name="pdfFile"
                            label="Book PDF File"
                            acceptTypes={ACCEPTED_PDF_TYPES}
                            icon={Upload}

@@ -59,7 +59,7 @@ export interface CreateBook {
    clerkId: string;
    title: string;
    author: string;
-   persona?: string;
+   voice?: string;
    fileURL: string;
    fileBlobKey: string;
    coverURL?: string;
