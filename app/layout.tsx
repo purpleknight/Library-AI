@@ -6,6 +6,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ClerkProvider } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -26,7 +27,7 @@ const monaSans = Mona_Sans({
 
 export const metadata: Metadata = {
   title: "Bookified",
-  description: `Transform yout books into interactive AI 
+  description: `Transform your books into interactive AI 
     conversations. Upload PDFs and chat with your books using
     voice.`,
 };
@@ -44,6 +45,7 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
+      <Toaster />
       </body>
     </html>
     </ClerkProvider>
