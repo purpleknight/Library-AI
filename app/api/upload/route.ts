@@ -11,9 +11,11 @@ export async function POST(request: Request): Promise<NextResponse> {
       // throw new Error("Unauthorized: User not authenticated.");
       return NextResponse.json({ error: 'Unauthorized'}, { status: 401 });
    }
-   const body = ( await request.json()) as HandleUploadBody;
+   
 
    try {
+      const body = ( await request.json()) as HandleUploadBody;
+      
       const jsonResponse = await handleUpload({
          token: process.env.BLOB_READ_WRITE_TOKEN,
          body, 
