@@ -30,8 +30,13 @@ export const connectToDatabase = async() => {
       cached.conn = await cached.promise;
    } catch (e) {
       cached.promise = null;
-      console.error(`MongoDB connection error. Please make sure
-         MongoDB is running. ` + e);
+      // console.error(`MongoDB connection error. Please make sure
+      //    MongoDB is running. ` + e);
+      if (process.env.NODE_ENV === 'development') {
+         console.error("MongoDB connection error. Please make sure MongoDB us running.", e);
+      } else {
+         console.error("MongoDB connection error.");
+      }
       throw e;
    }
 

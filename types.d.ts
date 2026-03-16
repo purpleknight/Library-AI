@@ -62,7 +62,7 @@ export interface CreateBook {
    voice?: string;
    fileURL: string;
    fileBlobKey: string;
-   coverURL?: string;
+   coverURL: string;
    coverBlobKey?: string;
    fileSize: number;
 }

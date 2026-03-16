@@ -43,25 +43,25 @@ const UploadForm = () => {
 
    const onSubmit = async( data: BookUploadFormValues) => {
       // ADD THIS BLOCK FIRST
-      try {
-         const testResponse = await fetch('/api/upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-               type: 'blob.generate-client-token',
-               payload: {
-                  pathname: 'test.pdf',
-                  multipart: false,
-                  clientPayload: null,
-               }
-            }),
-         });
-         console.log('Route status:', testResponse.status);
-         const testJson = await testResponse.json();
-         console.log('Route response:', JSON.stringify(testJson));
-      } catch(e) {
-         console.log('Route fetch error:', e);
-      }
+      // try {
+      //    const testResponse = await fetch('/api/upload', {
+      //       method: 'POST',
+      //       headers: { 'Content-Type': 'application/json' },
+      //       body: JSON.stringify({
+      //          type: 'blob.generate-client-token',
+      //          payload: {
+      //             pathname: 'test.pdf',
+      //             multipart: false,
+      //             clientPayload: null,
+      //          }
+      //       }),
+      //    });
+      //    console.log('Route status:', testResponse.status);
+      //    const testJson = await testResponse.json();
+      //    console.log('Route response:', JSON.stringify(testJson));
+      // } catch(e) {
+      //    console.log('Route fetch error:', e);
+      // }
       // END DIAGNOSTIC BLOCK
 
       if (!userId) {
