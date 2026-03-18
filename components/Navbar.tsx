@@ -9,7 +9,8 @@ import Link from 'next/link'
 
 const navItems = [
    { label: "Library", href: "/" },
-   { label: "Add New", href: "/books/new"}
+   { label: "Add New", href: "/books/new"},
+   { label: "Pricing", href: "/subscriptions"},
 ]
 
 const Navbar = () => {
