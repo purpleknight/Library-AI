@@ -6,7 +6,7 @@ import {escapeRegex, generateSlug, serializeData} from "@/lib/utils";
 import Book from "@/database/models/book.model";
 import BookSegment from "@/database/models/book-segment.model";
 import mongoose from "mongoose";
-import { getUserPlan } from "../subscription.server";
+// import { getUserPlan } from "../subscription.server";
 
 export const getAllBooks = async (search?: string) => {
    try {
@@ -34,7 +34,7 @@ export const getAllBooks = async (search?: string) => {
    } catch (e) {
       console.error('Error connecting to database', e);
       return {
-         success: false, error: e
+         success: false, error: 'Failed to fetch books. Please try again later.'
       }
    }
 }
@@ -60,7 +60,7 @@ export const checkBookExists = async (title: string) => {
    } catch (e) {
       console.error('Error checking book exists', e);
       return {
-         exists: false, error: e
+         exists: false, error: 'Failed to fetch books. Please try again later.'
       }
    }
 }
@@ -119,7 +119,7 @@ export const createBook = async (data: CreateBook) => {
 
       return {
          success: false,
-         error: e,
+         error: 'Failed to fetch books. Please try again later.',
       }
    }
 }
@@ -141,7 +141,7 @@ export const getBookBySlug = async (slug: string) => {
    } catch (e) {
       console.error('Error fetching book by slug', e);
       return {
-         success: false, error: e
+         success: false, error: 'Failed to fetch books. Please try again later.'
       }
    }
 }
@@ -171,7 +171,7 @@ export const saveBookSegments = async (bookId: string, clerkId: string, segments
 
       return {
          success: false,
-         error: e,
+         error: 'Failed to fetch books. Please try again later.',
       }
    }
 }
@@ -204,6 +204,13 @@ export const searchBookSegments = async (bookId: string, query: string, limit: n
       // Fallback: regex search matching ANY keyword
       if (segments.length === 0) {
          const keywords = query.split(/\s+/).filter((k) => k.length > 2);
+         if (keywords.length === 0) {
+            return {
+               success: true,
+               data: [],
+            };
+         }
+         
          const pattern = keywords.map(escapeRegex).join('|');
 
          segments = await BookSegment.find({

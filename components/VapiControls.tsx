@@ -11,7 +11,7 @@ import Transcript from "./Transcript";
 
 const VapiControls = ({ book }: { book: IBook }) => {
    const { status, isActive, messages, currentMessage, currentUserMessage, duration, start,
-      stop, clearError} = useVapi(book);
+      stop, limitError, clearError} = useVapi(book);
 
    return (
       <>
@@ -28,9 +28,13 @@ const VapiControls = ({ book }: { book: IBook }) => {
                      priority
                   />
                <div className="vapi-mic-wrapper">
-                  <button 
+                  <button
+                     type="button"
                      onClick={ isActive ? stop : start }
                      disabled={status === 'connecting'}
+                     aria-label={isActive ? "Stop voice assistant": "Start voice assistant"}
+                     title={isActive ? "Stop voice assistant" : "Start voice assistant"}
+                     aria-pressed={isActive}
                      className={`vapi-mic-btn shadow-md !w-[60px] !h-[60px] z-10 ${isActive 
                         ? 'vapi-mic-btn-active'
                         : 'vapi-mic-btn-inactive'}`}>
@@ -81,6 +85,17 @@ const VapiControls = ({ book }: { book: IBook }) => {
          </div> */}
 
          <div className="vapi-transcript-wrapper">
+            {limitError && (
+               <div role="alert" className="mb-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  <div className="flex items-start justify-between gap-3">
+                     <span>{limitError}</span>
+                     <button type="button" onClick={clearError} className="underline">
+                        Dismiss
+                     </button>
+                  </div>
+               </div>
+            )}
+
             <div className="transcript-container min-h-[400px]">
                <Transcript 
                   messages={messages}

@@ -41,7 +41,13 @@ const isEmpty = messages.length === 0 && !currentMessage && !currentUserMessage;
    }
 
    return (
-      <div ref={scrollRef} className="transcript-messages overflow-y-auto pr-2 flex-1">
+      <div 
+         ref={scrollRef} 
+         className="transcript-messages overflow-y-auto pr-2 flex-1"
+         role='log'
+         aria-live='polite'
+         aria-relevant='additions text'
+         aria-atomic='false'>
       {messages.map((message, index) => (
          <div
             key={index}
