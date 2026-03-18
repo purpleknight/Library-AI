@@ -1,16 +1,39 @@
 "use client";
 
-import useVapi from "@/hooks/useVapi";
+import useVapi, { CallStatus } from "@/hooks/useVapi";
 import { IBook } from "@/types";
 import { Mic } from "lucide-react";
 import Image from "next/image";
 import { MicOff } from "lucide-react";
 import Transcript from "./Transcript";
+import { formatDuration } from "@/lib/utils";
 
+const getStatusLabel = (status: CallStatus) => {
+   switch(status) {
+      case 'idle': return 'Ready';
+      case 'connecting': return 'Connecting...';
+      case 'starting': return 'Starting...';
+      case 'listening': return 'Listening...';
+      case 'thinking': return 'Thinking...';
+      case 'speaking': return 'Speaking...';
+      default: return 'Ready';
+   }
+}
+
+const getStatusDotClass = (status: CallStatus) => {
+   switch(status) {
+      case 'connecting': return 'vapi-status-dot-connecting';
+      case 'starting': return 'vapi-status-dot-connecting';
+      case 'listening': return 'vapi-status-dot-listening';
+      case 'thinking': return 'vapi-status-dot-thinking';
+      case 'speaking' : return 'vapi-status-dot-speaking';
+      default:          return 'vapi-status-dot-ready'
+   }
+};
 
 
 const VapiControls = ({ book }: { book: IBook }) => {
-   const { status, isActive, messages, currentMessage, currentUserMessage, duration, start,
+   const { status, isActive, messages, currentMessage, currentUserMessage, duration, maxDurationSeconds, start,
       stop, limitError, clearError} = useVapi(book);
 
    return (
@@ -59,15 +82,24 @@ const VapiControls = ({ book }: { book: IBook }) => {
                </div>
 
                <div className="flex flex-row flex-wrap gap-3">
+
                   <div className="vapi-status-indicator">
-                     <span className="vapi-status-dot vapi-status-dot-ready" />
-                     <span className="vapi-status-text">Ready</span>
+                     <span className={`vapi-status-dot ${getStatusDotClass(status)}`} />
+                     <span className="vapi-status-text">
+                        {getStatusLabel(status)}
+                     </span>
                   </div>
+
                   <div className="vapi-status-indicator">
-                     <span className="vapi-status-text">Voice: {book.voice ?? "Default"}</span>
+                     <span className="vapi-status-text">
+                        Voice: {book.voice ?? "Default"}
+                     </span>
                   </div>
+
                   <div className="vapi-status-indicator">
-                     <span className="vapi-status-text">0:00 / 15:00</span>
+                     <span className="vapi-status-text">
+                        {formatDuration(duration)} / {formatDuration(maxDurationSeconds)}
+                     </span>
                   </div>
                </div>
             </div>
