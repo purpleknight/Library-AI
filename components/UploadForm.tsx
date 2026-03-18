@@ -15,7 +15,7 @@ import LoadingOverlay from './LoadingOverlay';
 import { UploadSchema } from '@/lib/zod';
 import { useAuth } from '@clerk/nextjs';
 import { toast } from 'sonner';
-import { checkBookExists, createBook, saveBookSegments } from '@/lib/actions/book.action';
+import { checkBookExists, createBook, saveBookSegments } from '@/lib/actions/book.actions';
 import { useRouter } from 'next/navigation';
 import { parsePDFFile } from '@/lib/utils';
 import { upload } from '@vercel/blob/client';
