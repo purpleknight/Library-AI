@@ -2,7 +2,7 @@ import { sampleBooks } from "@/lib/constants"
 
 import BookCard from "@/components/BookCard"
 import HeroSection from "@/components/HeroSection"
-import { getAllBooks } from "@/lib/actions/book.action"
+import { getAllBooks } from "@/lib/actions/book.actions"
 
 const page = async () => {
   const bookResults = await getAllBooks();
