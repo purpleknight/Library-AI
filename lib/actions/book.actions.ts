@@ -6,6 +6,7 @@ import {escapeRegex, generateSlug, serializeData} from "@/lib/utils";
 import Book from "@/database/models/book.model";
 import BookSegment from "@/database/models/book-segment.model";
 import mongoose from "mongoose";
+import { revalidatePath } from "next/cache";
 // import { getUserPlan } from "../subscription.server";
 
 export const getAllBooks = async (search?: string) => {
@@ -110,6 +111,8 @@ export const createBook = async (data: CreateBook) => {
 
       const book = await Book.create({...data, clerkId: userId, slug, totalSegments: 0});
 
+      revalidatePath('/');
+
       return {
          success: true,
          data: serializeData(book),
@@ -210,7 +213,7 @@ export const searchBookSegments = async (bookId: string, query: string, limit: n
                data: [],
             };
          }
-         
+
          const pattern = keywords.map(escapeRegex).join('|');
 
          segments = await BookSegment.find({
